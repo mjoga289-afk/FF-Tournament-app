@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>tunff09 - Pro Tournament Hub</title>
+    <!-- Bootstrap + Icons + Fonts -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: radial-gradient(circle at 10% 30%, #0a0f1e, #03050b);
+            min-height: 100vh;
+            padding-bottom: 85px;
+            color: #eef2ff;
+        }
+        body::before { content: ''; position: fixed; inset: 0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); opacity: 0.03; z-index: -1; }
+        .navbar-bottom {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: rgba(10, 15, 30, 0.95);
+            backdrop-filter: blur(12px);
+            border-top: 1px solid rgba(124,58,237,0.4);
+            z-index: 1000;
+            border-radius: 30px 30px 0 0;
+            padding: 8px 0;
+        }
+        .nav-item-bottom {
+            text-align: center; color: #a5b4fc; text-decoration: none; font-size: 11px;
+            transition: all 0.2s; cursor: pointer; font-weight: 500;
+        }
+        .nav-item-bottom i { font-size: 22px; display: block; margin-bottom: 2px; }
+        .nav-item-bottom.active { color: #c084fc; transform: translateY(-3px); text-shadow: 0 0 5px #a855f7; }
+        .main-content { padding: 16px; max-width: 800px; margin: 0 auto; }
+        .page { display: none; animation: fadeIn 0.3s ease; }
+        .page.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .glass-card {
+            background: rgba(15, 25, 45, 0.75);
+            backdrop-filter: blur(12px);
+            border-radius: 28px;
+            padding: 22px;
+            margin-bottom: 22px;
+            border: 1px solid rgba(124,58,237,0.3);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+        }
+        .stat-card { background: rgba(0,0,0,0.4); border-radius: 24px; padding: 18px; text-align: center; border: 1px solid #7c3aed33; }
+        .btn-primary-custom {
+            background: linear-gradient(115deg, #7c3aed, #a855f7);
+            color: white; border: none; padding: 14px; border-radius: 50px; font-weight: 600; width: 100%;
+            transition: all 0.3s;
+        }
+        .btn-primary-custom:hover { transform: translateY(-2px); box-shadow: 0 12px 25px rgba(124,58,237,0.5); }
+        .admin-btn-float {
+            position: fixed; top: 18px; left: 18px;
+            background: #0f0f1f; color: white; padding: 10px 20px; border-radius: 50px;
+            font-weight: 600; z-index: 2000; box-shadow: 0 6px 18px rgba(0,0,0,0.5);
+            display: none; cursor: pointer; border: none; font-size: 14px;
+            border: 1px solid #7c3aed;
+        }
+        .support-btn-float {
+            position: fixed; top: 18px; right: 18px;
+            background: #25D366; color: white; width: 52px; height: 52px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; font-size: 28px; z-index: 2000;
+            text-decoration: none;
+            box-shadow: 0 4px 15px rgba(37,211,102,0.4);
+        }
+        .tournament-banner {
+            background: linear-gradient(125deg, #db2777, #c026d3);
+            border-radius: 35px;
+            padding: 35px 20px;
+            text-align: center;
+            margin-bottom: 25px;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 #c026d380; } 70% { box-shadow: 0 0 0 12px #c026d300; } 100% { box-shadow: 0 0 0 0 #c026d300; } }
+        .tourney-card {
+            background: rgba(20, 30, 55, 0.8);
+            border-radius: 28px;
+            overflow: hidden;
+            margin-bottom: 18px;
+            border: 1px solid #4f46e5;
+            transition: 0.25s;
+        }
+        .tourney-card:hover { transform: translateY(-4px); border-color: #a855f7; }
+        .tourney-header {
+            background: linear-gradient(115deg, #2563eb, #7c3aed);
+            padding: 14px 18px;
+            display: flex;
+            justify-content: space-between;
+            font-weight: 700;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 5px 14px;
+            border-radius: 40px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .status-upcoming { background: #1e3a8a; color: #a5f3fc; }
+        .status-ongoing { background: #166534; color: #bef264; }
+        .status-selection { background: #9a3412; color: #fed7aa; }
+        .status-completed { background: #1e293b; color: #94a3b8; }
+        .room-details {
+            background: #0f172a;
+            border-radius: 18px;
+            padding: 12px;
+            margin-top: 12px;
+            border-left: 4px solid #7c3aed;
+            font-size: 13px;
+            color: #cbd5e1;
+        }
+        .admin-panel-full {
+            position: fixed;
+            inset: 0;
+            background: #03050b;
+            z-index: 5000;
+            display: none;
+            overflow-y: auto;
+            padding: 22px;
+            color: white;
+        }
+        .admin-panel-full.show { display: block; }
+        .participant-item {
+            background: #0f172a;
+            border-radius: 18px;
+            padding: 14px;
+            margin-bottom: 10px;
+            border-left: 5px solid #7c3aed;
+        }
+        .participant-item.selected { border-left-color: #22c55e; background: #0f172a; }
+        .success-message {
+            background: #22c55e;
+            color: white;
+            padding: 14px 24px;
+            border-radius: 60px;
+            font-size: 15px;
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            right: 15px;
+            max-width: 380px;
+            margin: 0 auto;
+            z-index: 10000;
+            text-align: center;
+        }
+        .success-message.show { display: block; animation: slideDown 0.2s; }
+        @keyframes slideDown { from { opacity:0; transform:translateY(-20px); } to { opacity:1; transform:translateY(0); } }
+        .hidden { display: none !important; }
+        footer {
+            margin-top: 30px;
+            text-align: center;
+            color: #6b7280;
+            font-size: 12px;
+        }
+        .badge.bg-primary { background: #7c3aed !important; }
+        input, select, textarea {
+            background: #0f172a !important;
+            border: 1px solid #334155 !important;
+            color: white !important;
+        }
+        input:focus, select:focus, textarea:focus {
+            border-color: #a855f7 !important;
+            box-shadow: 0 0 0 2px #a855f740 !important;
+        }
+        .youtube-code-input {
+            background: #1f2937;
+            border: 1px solid #7c3aed;
+            border-radius: 50px;
+            padding: 8px 15px;
+            color: white;
+        }
+        .support-edit {
+            background: #111827;
+            border-radius: 16px;
+            padding: 12px;
+            margin-top: 10px;
+        }
+        .glow-text { text-shadow: 0 0 8px rgba(124,58,237,0.6); }
+        .tournament-img { max-height: 150px; object-fit: cover; border-radius: 20px; margin-top: 10px; }
+        .task-img { max-height: 80px; object-fit: cover; border-radius: 12px; margin-top: 6px; }
+    </style>
+</head>
+<body>
+
+<button id="adminBtn" class="admin-btn-float" onclick="toggleAdminPanel(true)"><i class="bi bi-shield-lock me-2"></i> এডমিন</button>
+<a href="#" id="supportBtn" class="support-btn-float" target="_blank"><i class="bi bi-whatsapp"></i></a>
+<div id="successMessage" class="success-message"></div>
+
+<div class="main-content" id="mainContent"></div>
+
+<div id="adminPanel" class="admin-panel-full">
+    <div class="admin-container" style="max-width:1200px; margin:0 auto;">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="fw-bold m-0"><i class="bi bi-shield-fill me-2" style="color:#7c3aed;"></i> এডমিন প্যানেল</h4>
+            <button class="btn-close btn-close-white" onclick="toggleAdminPanel(false)"></button>
+        </div>
+        <ul class="nav nav-tabs mb-3 border-secondary" id="adminTabs" role="tablist">
+            <li class="nav-item"><button class="nav-link active text-white" data-bs-toggle="tab" data-bs-target="#adm-users">ইউজার</button></li>
+            <li class="nav-item"><button class="nav-link text-white" data-bs-toggle="tab" data-bs-target="#adm-tasks">টাস্ক</button></li>
+            <li class="nav-item"><button class="nav-link text-white" data-bs-toggle="tab" data-bs-target="#adm-tournaments">টুর্নামেন্ট</button></li>
+            <li class="nav-item"><button class="nav-link text-white" data-bs-toggle="tab" data-bs-target="#adm-manage">ম্যানেজ</button></li>
+            <li class="nav-item"><button class="nav-link text-white" data-bs-toggle="tab" data-bs-target="#adm-popups">পপআপ</button></li>
+            <li class="nav-item"><button class="nav-link text-white" data-bs-toggle="tab" data-bs-target="#adm-about">এবাউট</button></li>
+            <li class="nav-item"><button class="nav-link text-white" data-bs-toggle="tab" data-bs-target="#adm-extras">এক্সট্রা</button></li>
+        </ul>
+        <div class="tab-content">
+            <!-- USERS -->
+            <div class="tab-pane fade show active" id="adm-users">
+                <div class="glass-card"><h6><i class="bi bi-search"></i> ইউজার খুঁজুন</h6><div class="input-group"><input id="userSearch" class="form-control" placeholder="FF ID/ইমেইল/ফোন"><button class="btn btn-primary" onclick="searchUser()">সার্চ</button></div><div id="searchResult" class="mt-3 hidden"></div></div>
+                <div class="glass-card"><h6><i class="bi bi-people"></i> সকল ইউজার ও টাস্ক কমপ্লিট</h6><div id="usersList" style="max-height:500px; overflow-y:auto;"></div></div>
+            </div>
+            <!-- TASKS -->
+            <div class="tab-pane fade" id="adm-tasks">
+                <div class="glass-card"><h6><i class="bi bi-plus-circle"></i> নতুন টাস্ক</h6><input id="taskTitle" class="form-control mb-2" placeholder="টাইটেল"><textarea id="taskDesc" class="form-control mb-2" placeholder="বিবরণ" rows="2"></textarea><div class="row"><div class="col-6"><input id="taskReward" type="number" class="form-control mb-2" placeholder="কয়েন"></div><div class="col-6"><select id="taskType" class="form-select"><option value="youtube">ইউটিউব</option><option value="facebook">ফেসবুক</option><option value="daily">ডেইলি</option><option value="youtube_code">ইউটিউব (কোড)</option></select></div></div><input id="taskLink" class="form-control mb-2" placeholder="লিংক (ঐচ্ছিক)"><input id="taskCode" class="form-control mb-2" placeholder="কোড (শুধু ইউটিউব কোড টাস্কের জন্য)" style="display:none;"><input id="taskImage" class="form-control mb-2" placeholder="ইমেজ URL (ঐচ্ছিক)"><button class="btn btn-primary w-100" onclick="addTask()">টাস্ক যোগ করুন</button></div>
+                <div class="glass-card"><h6><i class="bi bi-list-check"></i> সকল টাস্ক</h6><div id="tasksList"></div></div>
+            </div>
+            <!-- TOURNAMENTS -->
+            <div class="tab-pane fade" id="adm-tournaments">
+                <div class="glass-card"><h6><i class="bi bi-trophy"></i> নতুন টুর্নামেন্ট</h6><input id="tournamentName" class="form-control mb-2" placeholder="নাম"><input id="tournamentImage" class="form-control mb-2" placeholder="ইমেজ URL (ঐচ্ছিক)"><div class="row"><div class="col-6"><select id="tournamentType"><option value="solo">সোলো</option><option value="duo">ডুয়ো</option><option value="squad">স্কোয়াড</option></select></div><div class="col-6"><select id="tournamentMap"><option value="bermuda">বারমুডা</option><option value="purgatory">পর্গেটরি</option></select></div></div><div class="row"><div class="col-6"><input id="entryFee" type="number" class="form-control mb-2" placeholder="এন্ট্রি ফি"></div><div class="col-6"><input id="maxPlayers" type="number" class="form-control mb-2" placeholder="সর্বোচ্চ খেলোয়াড়"></div></div><input id="prizePool" class="form-control mb-2" placeholder="প্রাইজ মানি (টাকা)"><input id="startTime" type="datetime-local" class="form-control mb-2"><button class="btn btn-primary w-100" onclick="addTournament()">তৈরি করুন</button></div>
+                <div class="glass-card"><h6><i class="bi bi-list"></i> সকল টুর্নামেন্ট</h6><div id="tournamentsList"></div></div>
+            </div>
+            <!-- MANAGE -->
+            <div class="tab-pane fade" id="adm-manage">
+                <div class="glass-card"><h6><i class="bi bi-gear"></i> টুর্নামেন্ট নির্বাচন</h6><select id="manageTournamentSelect" class="form-select mb-3" onchange="loadTournamentForManagement()"><option value="">বাছাই করুন</option></select></div>
+                <div id="tournamentManageContent" class="hidden">
+                    <div class="glass-card"><h5 id="manageTournamentName" class="text-center"></h5><div class="row text-center"><div class="col-4"><small>জয়েন করেছে</small><h4 id="joinedCount">0</h4></div><div class="col-4"><small>সিলেক্টেড</small><h4 id="selectedCount">0</h4></div><div class="col-4"><small>মোট</small><h4 id="maxCount">0</h4></div></div><div class="mt-2"><select id="tournamentStatusSelect" class="form-select" onchange="updateTournamentStatus()"><option value="upcoming">আসন্ন</option><option value="selection">সিলেকশন চলছে</option><option value="ongoing">চলছে</option><option value="completed">শেষ</option></select><button class="btn btn-sm btn-outline-secondary mt-2 w-100" onclick="updateTournamentStatus()">স্ট্যাটাস আপডেট</button></div></div>
+                    <div class="glass-card"><h6><i class="bi bi-shuffle"></i> র‍্যান্ডম সিলেক্ট (শুধু নতুন)</h6><div class="row"><div class="col-7"><input id="selectCount" type="number" class="form-control" placeholder="কতজন?"></div><div class="col-5"><button class="btn btn-primary w-100" onclick="selectRandomPlayers()">সিলেক্ট</button></div></div><div id="selectionHistory" class="mt-3"></div></div>
+                    <div class="glass-card"><h6><i class="bi bi-house-door"></i> রুম আইডি ও পাস</h6><div class="row"><div class="col-6"><input id="roomId" class="form-control mb-2" placeholder="রুম আইডি"></div><div class="col-6"><input id="roomPassword" class="form-control mb-2" placeholder="পাসওয়ার্ড"></div></div><button class="btn btn-success w-100" onclick="setRoomDetails()">রুম সেট করুন</button><div id="currentRoomDetails" class="room-details hidden mt-2"></div></div>
+                    <div class="glass-card"><h6><i class="bi bi-search"></i> প্লেয়ার খুঁজুন</h6><div class="input-group"><input id="participantSearch" class="form-control" placeholder="FF ID, ইমেইল, ফোন"><button class="btn btn-primary" onclick="searchParticipant()">সার্চ</button></div><div id="participantSearchResult"></div></div>
+                    <div class="glass-card"><h6><i class="bi bi-people"></i> জয়েনকৃত প্লেয়ার</h6><div id="participantsList"></div></div>
+                </div>
+                <div class="glass-card mt-3"><h6><i class="bi bi-cash-stack"></i> বাল্ক কয়েন যোগ</h6><div class="row"><div class="col-8"><input id="bulkCoinEmail" class="form-control" placeholder="ইমেইল (কমা দিয়ে আলাদা)"></div><div class="col-4"><input id="bulkCoinAmount" type="number" class="form-control" placeholder="কয়েন"></div></div><button class="btn btn-warning w-100 mt-2" onclick="bulkAddCoins()">সবাইকে কয়েন দিন</button></div>
+            </div>
+            <!-- POPUPS -->
+            <div class="tab-pane fade" id="adm-popups">
+                <div class="glass-card"><h6><i class="bi bi-plus-circle"></i> নতুন পপআপ</h6><input id="popupImage" class="form-control mb-2" placeholder="ইমেজ URL"><input id="popupLink" class="form-control mb-2" placeholder="লিংক (ঐচ্ছিক)"><input id="popupText" class="form-control mb-2" placeholder="টেক্সট (ঐচ্ছিক)"><button class="btn btn-primary w-100" onclick="addPopup()">যোগ করুন</button></div>
+                <div class="glass-card"><div id="popupsList"></div></div>
+            </div>
+            <!-- ABOUT -->
+            <div class="tab-pane fade" id="adm-about">
+                <div class="glass-card"><textarea id="aboutContent" class="form-control mb-2" rows="8" placeholder="এবাউট টেক্সট (প্রতি লাইনে আলাদা)"></textarea><input id="aboutImage" class="form-control mb-2" placeholder="ইমেজ URL"><button class="btn btn-primary w-100" onclick="updateAbout()">সেভ করুন</button></div>
+            </div>
+            <!-- EXTRAS -->
+            <div class="tab-pane fade" id="adm-extras">
+                <div class="glass-card"><h6><i class="bi bi-database"></i> ডাটাবেজ ব্যাকআপ & রিস্টোর</h6>
+                    <button class="btn btn-info w-100 mb-2" onclick="manualBackup()">ব্যাকআপ নিন (JSON)</button>
+                    <button class="btn btn-secondary w-100 mb-2" onclick="downloadBackup()">📥 JSON ফাইল ডাউনলোড</button>
+                    <input type="file" id="restoreFileInput" class="form-control mb-2" accept=".json">
+                    <button class="btn btn-warning w-100" onclick="restoreFromFile()">📂 JSON ফাইল থেকে রিস্টোর</button>
+                </div>
+                <div class="glass-card"><h6><i class="bi bi-chat-dots"></i> সাপোর্ট কন্টাক্ট এডিট</h6>
+                    <div class="support-edit">
+                        <label>WhatsApp নম্বর:</label><input type="text" id="adminWhatsApp" class="form-control mb-2" placeholder="+880xxxxxxxxxx">
+                        <label>টেলিগ্রাম গ্রুপ লিংক:</label><input type="text" id="adminTelegram" class="form-control mb-2" placeholder="https://t.me/...">
+                        <button class="btn btn-primary mt-2" onclick="saveSupportContacts()">সেভ করুন</button>
+                    </div>
+                </div>
+                <div class="glass-card"><h6><i class="bi bi-person-x"></i> সমস্ত টুর্নামেন্ট থেকে একজন ইউজার রিমুভ</h6>
+                    <input id="globalRemoveUserId" class="form-control mb-2" placeholder="ইউজার ইমেইল">
+                    <button class="btn btn-danger" onclick="removeUserFromAllTournaments()">সব টুর্নামেন্ট থেকে মুছুন</button>
+                </div>
+                <div class="glass-card"><h6><i class="bi bi-broadcast"></i> গ্লোবাল নোটিশ</h6>
+                    <textarea id="globalNotice" class="form-control mb-2" rows="2" placeholder="সকলের জন্য নোটিশ..."></textarea>
+                    <button class="btn btn-primary" onclick="setGlobalNotice()">নোটিশ সেট করুন</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<nav class="navbar-bottom">
+    <div class="container-fluid"><div class="row g-0">
+        <div class="col"><div class="nav-item-bottom active" onclick="showPage('home', this)"><i class="bi bi-house-door"></i><span>হোম</span></div></div>
+        <div class="col"><div class="nav-item-bottom" onclick="showPage('task', this)"><i class="bi bi-list-task"></i><span>টাস্ক</span></div></div>
+        <div class="col"><div class="nav-item-bottom" onclick="showPage('tournament', this)"><i class="bi bi-trophy"></i><span>টুর্নামেন্ট</span></div></div>
+        <div class="col"><div class="nav-item-bottom" onclick="showPage('history', this)"><i class="bi bi-clock-history"></i><span>হিস্ট্রি</span></div></div>
+        <div class="col"><div class="nav-item-bottom" onclick="showPage('about', this)"><i class="bi bi-info-circle"></i><span>এবাউট</span></div></div>
+        <div class="col"><div class="nav-item-bottom" onclick="showPage('account', this)"><i class="bi bi-person"></i><span>অ্যাকাউন্ট</span></div></div>
+    </div></div>
+</nav>
+
+<script>
+    // ==================== CONFIGURATION ====================
+    // 🔴 এখানে আপনার Render.com ব্যাকএন্ড URL দিন 🔴
+    const API_BASE_URL = 'https://python-vcnx.onrender.com';
+    
+    // ------------------- Global variables -------------------
+    let currentUser = null;
+    let isAdmin = false;
+    let currentManageTournament = null;
+    const ADMIN_EMAIL = 'mjoga289@gmail.com';
+
+    // Helper functions
+    function showSuccess(msg) {
+        const el = document.getElementById('successMessage');
+        el.textContent = '✅ ' + msg;
+        el.classList.add('show');
+        setTimeout(() => el.classList.remove('show'), 2800);
+    }
+
+    async function apiCall(url, method, body) {
+        const options = { method, headers: { 'Content-Type': 'application/json' } };
+        if (body) options.body = JSON.stringify(body);
+        const res = await fetch(`${API_BASE_URL}${url}`, options);
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Request failed');
+        return data;
+    }
+
+    // ------------------- Auth -------------------
+    window.toggleSignup = function() {
+        document.getElementById('loginFFID').classList.toggle('hidden');
+        document.getElementById('loginPhone').classList.toggle('hidden');
+    };
+
+    window.handleLogin = async function() {
+        const email = document.getElementById('loginEmail').value.trim();
+        const pass = document.getElementById('loginPassword').value;
+        const ffid = document.getElementById('loginFFID')?.value.trim();
+        const phone = document.getElementById('loginPhone')?.value.trim();
+        const isSignup = document.getElementById('loginFFID') && !document.getElementById('loginFFID').classList.contains('hidden');
+        if (!email || !pass) { alert('ইমেইল ও পাস দিন'); return; }
+        try {
+            if (isSignup) {
+                if (!ffid || !phone) { alert('FF ID ও ফোন দিন'); return; }
+                const data = await apiCall('/api/register', 'POST', { email, password: pass, ffid, phone });
+                currentUser = data.user;
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                if (email === ADMIN_EMAIL) isAdmin = true;
+                showSuccess('অ্যাকাউন্ট তৈরি! ২০ কয়েন');
+                document.getElementById('account').innerHTML = renderAccount();
+                showPage('home');
+            } else {
+                const data = await apiCall('/api/login', 'POST', { email, password: pass });
+                currentUser = data.user;
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                if (currentUser.email === ADMIN_EMAIL) isAdmin = true;
+                showSuccess('লগইন সফল');
+                document.getElementById('account').innerHTML = renderAccount();
+                showPage('home');
+            }
+            updateAdminUI();
+        } catch(e) { alert(e.message); }
+    };
+
+    window.logout = function() {
+        currentUser = null;
+        localStorage.removeItem('currentUser');
+        isAdmin = false;
+        updateAdminUI();
+        showPage('home');
+        document.getElementById('account').innerHTML = renderAccount();
+        showSuccess('লগআউট');
+    };
+
+    function updateAdminUI() {
+        const btn = document.getElementById('adminBtn');
+        if (isAdmin) btn.style.display = 'block';
+        else btn.style.display = 'none';
+    }
+
+    // ------------------- Page rendering -------------------
+    async function renderHome() {
+        const support = await apiCall('/api/config/support', 'GET');
+        document.getElementById('supportBtn').href = `https://wa.me/${support.whatsapp}`;
+        const notice = await apiCall('/api/config/global_notice', 'GET');
+        return `<div class="website-header" style="background: linear-gradient(125deg, #1e1b4b, #312e81); border-radius: 40px; padding: 45px 20px; text-align: center;"><h1 class="glow-text">tunff09</h1><p>Pro Free Fire Tournament Hub</p></div>
+        <div class="tournament-banner"><h3>🏆 প্রতি সপ্তাহ ২০,০০০+ টাকার টুর্নামেন্ট 🏆</h3><p>র‍্যান্ডম সিলেকশন | রিয়েল টাইম রুম</p></div>
+        ${!currentUser ? `<div class="glass-card text-center"><h5>একাউন্ট তৈরি করুন</h5><button class="btn-primary-custom mt-2" onclick="showPage('account')">লগইন / সাইন আপ</button></div>` : `<div class="glass-card text-center"><h5>স্বাগতম, ${currentUser.email.split('@')[0]}</h5><p class="fw-bold text-primary">কয়েন: ${currentUser.coins || 0}</p></div>`}
+        <div class="glass-card"><h6><i class="bi bi-megaphone"></i> নোটিশ বোর্ড</h6><p id="globalNoticeText" class="small text-muted">${notice.text}</p></div>
+        <footer><p>&copy; 2025 tunff09 | Tournament Platform</p></footer>`;
+    }
+
+    function renderTask() {
+        return `<h5 class="fw-bold mb-3"><i class="bi bi-list-task"></i> ডেইলি টাস্ক</h5><div id="tasksContainer"><div class="spinner-border"></div></div><footer></footer>`;
+    }
+
+    function renderTournament() {
+        return `<h5 class="fw-bold mb-3"><i class="bi bi-trophy"></i> চলমান টুর্নামেন্ট</h5><div class="alert alert-dark bg-dark text-info border-0">• প্রতি টুর্নামেন্টে র‍্যান্ডম ৫০+ জন পাবে রুম আইডি (শুধু নতুন)<br>• সিলেকশন রাউন্ড অনুযায়ী নতুন প্লেয়াররা সুযোগ পাবে</div><div id="tournamentsContainer"><div class="spinner-border"></div></div><footer></footer>`;
+    }
+
+    function renderHistory() {
+        if (!currentUser) return `<div class="glass-card text-center"><i class="bi bi-clock-history"></i><h5>হিস্ট্রি দেখতে লগইন করুন</h5><button class="btn-primary-custom mt-2" onclick="showPage('account')">লগইন</button></div><footer></footer>`;
+        return `<h5><i class="bi bi-clock-history"></i> আমার টুর্নামেন্ট হিস্ট্রি</h5><div id="userHistoryContainer"><div class="spinner-border"></div></div><footer></footer>`;
+    }
+
+    function renderAbout() {
+        return `<h5><i class="bi bi-info-circle"></i> টুর্নামেন্ট সম্পর্কে</h5><div class="glass-card"><div id="about-text">লোড হচ্ছে...</div><div id="about-image"></div></div><footer></footer>`;
+    }
+
+    function renderAccount() {
+        if (!currentUser) {
+            return `<div class="glass-card"><h5 class="text-center">স্বাগতম</h5><input id="loginEmail" class="form-control mb-3" placeholder="ইমেইল"><input id="loginPassword" type="password" class="form-control mb-3" placeholder="পাসওয়ার্ড"><input id="loginFFID" class="form-control mb-3 hidden" placeholder="Free Fire ID"><input id="loginPhone" class="form-control mb-3 hidden" placeholder="WhatsApp নাম্বার"><button class="btn-primary-custom mb-2" onclick="handleLogin()">লগইন</button><button class="btn btn-link w-100 text-muted small" onclick="toggleSignup()">নতুন একাউন্ট তৈরি করুন</button></div><footer></footer>`;
+        } else {
+            return `<div class="glass-card text-center"><div style="width:80px;height:80px;background:linear-gradient(135deg,#7c3aed,#a855f7);border-radius:50%;margin:0 auto 12px;display:flex;align-items:center;justify-content:center"><i class="bi bi-person text-white" style="font-size:40px"></i></div><h5>${currentUser.email.split('@')[0]}</h5><div class="stat-card mb-3"><span>কয়েন</span><h3 class="text-primary">${currentUser.coins || 0}</h3></div><div class="bg-dark p-2 rounded">FF ID: ${currentUser.ffid || '---'}<br>WhatsApp: ${currentUser.phone || '---'}</div><button class="btn btn-outline-danger w-100 mt-3 rounded-pill" onclick="logout()">লগআউট</button></div><footer></footer>`;
+        }
+    }
+
+    window.showPage = async function(pageId, element) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.getElementById(pageId).classList.add('active');
+        if(element) document.querySelectorAll('.nav-item-bottom').forEach(n => n.classList.remove('active')); element.classList.add('active');
+        window.scrollTo(0,0);
+        if (pageId === 'tournament') await loadTournaments();
+        if (pageId === 'task') await loadTasks();
+        if (pageId === 'about') await loadAbout();
+        if (pageId === 'history' && currentUser) await loadUserHistory();
+    };
+
+    // ------------------- Tasks -------------------
+    async function loadTasks() {
+        try {
+            const tasks = await apiCall('/api/tasks', 'GET');
+            let html = '';
+            for (let t of tasks) {
+                let completed = false;
+                html += `<div class="glass-card">${t.image_url ? `<img src="${t.image_url}" class="task-img w-100">` : ''}<h6>${t.title}</h6><p>${t.description}</p>`;
+                if (t.type === 'youtube_code') {
+                    html += `<div class="mb-2"><input type="text" id="code_${t.id}" class="youtube-code-input w-100" placeholder="ভিডিওতে থাকা কোডটি লিখুন"></div>
+                             <div class="d-flex justify-content-between"><span class="badge bg-primary">+${t.reward} কয়েন</span>
+                             <button class="btn btn-sm btn-outline-primary" onclick="submitYouTubeCode(${t.id}, ${t.reward}, '${t.code || ''}')" ${!currentUser ? 'disabled' : ''}>কোড সাবমিট</button></div></div>`;
+                } else {
+                    html += `<div class="d-flex justify-content-between"><span class="badge bg-primary">+${t.reward} কয়েন</span>
+                             <button class="btn btn-sm btn-outline-primary" onclick="completeTask(${t.id}, ${t.reward})" ${!currentUser ? 'disabled' : ''}>সম্পন্ন করুন</button></div></div>`;
+                }
+            }
+            document.getElementById('tasksContainer').innerHTML = html || '<p class="text-muted">কোন টাস্ক নেই</p>';
+        } catch(e) { console.error(e); document.getElementById('tasksContainer').innerHTML = '<p class="text-danger">লোড করতে ব্যর্থ</p>'; }
+    }
+
+    window.submitYouTubeCode = async function(taskId, reward, correctCode) {
+        const inputCode = document.getElementById(`code_${taskId}`).value.trim();
+        if (!inputCode) { alert('কোড দিন'); return; }
+        if (inputCode !== correctCode) { alert('ভুল কোড!'); return; }
+        await completeTask(taskId, reward);
+    };
+
+    window.completeTask = async function(taskId, reward) {
+        if (!currentUser) { alert('লগইন করুন'); showPage('account'); return; }
+        try {
+            await apiCall('/api/complete_task', 'POST', { user_id: currentUser.id, task_id: taskId, code: null });
+            currentUser.coins += reward;
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            showSuccess(`+${reward} কয়েন`);
+            await loadTasks();
+            document.getElementById('account').innerHTML = renderAccount();
+        } catch(e) { alert(e.message); }
+    };
+
+    // ------------------- Tournaments -------------------
+    async function loadTournaments() {
+        try {
+            const tours = await apiCall('/api/tournaments', 'GET');
+            let html = '';
+            for (let t of tours) {
+                let userJoined = false;
+                if (currentUser) {
+                    const parts = await apiCall(`/api/tournament_participants/${t.id}`, 'GET');
+                    userJoined = parts.some(p => p.user_id === currentUser.id);
+                }
+                const statusClass = `status-${t.status || 'upcoming'}`;
+                const statusText = { upcoming:'আসন্ন', ongoing:'চলছে', selection:'সিলেকশন চলছে', completed:'শেষ' }[t.status] || 'আসন্ন';
+                html += `<div class="tourney-card">${t.image_url ? `<img src="${t.image_url}" class="tournament-img w-100">` : ''}<div class="tourney-header"><span>Entry: ${t.entry_fee} Coins</span><span>Prize: ${t.prize_pool} TK</span></div><div class="tourney-body"><h6>${t.name}</h6><p class="small"><i class="bi bi-people"></i> ${t.type} | ${t.map}<br><i class="bi bi-calendar"></i> ${new Date(t.start_time).toLocaleString()}<br><span class="status-badge ${statusClass}">${statusText}</span> <span>${t.current_participants || 0}/${t.max_players}</span></p>${t.room_details && t.status === 'ongoing' ? `<div class="room-details"><small>রুম: ${t.room_details.roomId}</small><br><small>পাস: ${t.room_details.password}</small></div>` : ''}${!userJoined && (t.status === 'upcoming' || t.status === 'ongoing') ? `<button class="btn btn-dark btn-sm w-100 rounded-pill mt-2" onclick="joinTournament(${t.id}, ${t.entry_fee})" ${!currentUser ? 'disabled' : ''}>${!currentUser ? 'লগইন করুন' : 'জয়েন করুন'}</button>` : userJoined ? '<div class="text-success small text-center mt-2"><i class="bi bi-check-circle"></i> জয়েন করেছেন</div>' : ''}</div></div>`;
+            }
+            document.getElementById('tournamentsContainer').innerHTML = html || '<p class="text-muted">কোন টুর্নামেন্ট নেই</p>';
+        } catch(e) { console.error(e); document.getElementById('tournamentsContainer').innerHTML = '<p class="text-danger">লোড করতে ব্যর্থ</p>'; }
+    }
+
+    window.joinTournament = async function(tid, fee) {
+        if (!currentUser) { alert('লগইন করুন'); showPage('account'); return; }
+        if (currentUser.coins < fee) { alert('কয়েন কম'); return; }
+        try {
+            await apiCall('/api/join_tournament', 'POST', { user_id: currentUser.id, tournament_id: tid, entry_fee: fee });
+            currentUser.coins -= fee;
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            showSuccess('জয়েন সম্পন্ন');
+            await loadTournaments();
+            document.getElementById('account').innerHTML = renderAccount();
+        } catch(e) { alert(e.message); }
+    };
+
+    async function loadUserHistory() {
+        try {
+            const tours = await apiCall('/api/tournaments', 'GET');
+            let history = [];
+            for (let t of tours) {
+                const parts = await apiCall(`/api/tournament_participants/${t.id}`, 'GET');
+                const my = parts.find(p => p.user_id === currentUser.id);
+                if (my) history.push({ ...my, tournament: t });
+            }
+            let html = '';
+            for (const h of history) {
+                const statusText = { joined:'জয়েন করেছেন', selected:'সিলেক্টেড', room_received:'রুম পেয়েছেন', completed:'সম্পন্ন' }[h.status] || h.status;
+                html += `<div class="tourney-card"><div class="tourney-body"><h6>${h.tournament.name}</h6><p class="small">${new Date(h.joined_at).toLocaleString()}<br><span class="status-badge status-upcoming">${statusText}</span>${h.selection_round ? ` রাউন্ড: ${h.selection_round}` : ''}</p>${h.status === 'room_received' && h.tournament.room_details ? `<div class="room-details"><small>রুম: ${h.tournament.room_details.roomId}</small><br><small>পাস: ${h.tournament.room_details.password}</small></div>` : ''}</div></div>`;
+            }
+            document.getElementById('userHistoryContainer').innerHTML = html || '<p class="text-muted">কোন ইতিহাস নেই</p>';
+        } catch(e) { console.error(e); document.getElementById('userHistoryContainer').innerHTML = '<p class="text-danger">লোড করতে ব্যর্থ</p>'; }
+    }
+
+    async function loadAbout() {
+        try {
+            const about = await apiCall('/api/about', 'GET');
+            document.getElementById('about-text').innerHTML = about.content.replace(/\n/g, '<br>');
+            if (about.image_url) document.getElementById('about-image').innerHTML = `<img src="${about.image_url}" class="img-fluid rounded mt-3">`;
+        } catch(e) { console.error(e); }
+    }
+
+    // ------------------- Admin functions -------------------
+    window.toggleAdminPanel = function(show) {
+        if (!isAdmin) {
+            const pwd = prompt('এডমিন পাসওয়ার্ড:');
+            if (pwd === 'admin123') {
+                isAdmin = true;
+                updateAdminUI();
+            } else { alert('ভুল পাসওয়ার্ড'); return; }
+        }
+        document.getElementById('adminPanel').classList.toggle('show', show);
+        if (show) loadAdminData();
+    };
+
+    async function loadAdminData() {
+        await Promise.all([loadUsersList(), loadTasksList(), loadTournamentsList(), loadPopupsList(), loadAboutForEdit(), loadTournamentSelect(), loadGlobalNoticeForEdit(), loadSupportForEdit()]);
+    }
+
+    async function loadUsersList() {
+        const users = await apiCall('/api/users?admin_email=' + ADMIN_EMAIL, 'GET');
+        let html = '<table class="table table-dark table-striped"><thead><tr><th>ইমেইল</th><th>FF ID</th><th>কয়েন</th><th>অ্যাকশন</th></tr></thead><tbody>';
+        users.forEach(u => {
+            html += `<tr><td>${u.email}</td><td>${u.ffid || 'N/A'}</td><td>${u.coins || 0}</td><td><button class="btn btn-sm btn-success" onclick="giveCoins(${u.id})">+কয়েন</button> <button class="btn btn-sm btn-danger" onclick="deleteUser(${u.id})">ডিলিট</button></td></tr>`;
+        });
+        html += '</tbody></table>';
+        document.getElementById('usersList').innerHTML = html;
+    }
+
+    async function loadTasksList() {
+        const tasks = await apiCall('/api/tasks', 'GET');
+        let html = '';
+        tasks.forEach(t => {
+            html += `<div class="d-flex justify-content-between align-items-center border-bottom p-2"><div><b>${t.title}</b> +${t.reward}</div><button class="btn btn-sm btn-danger" onclick="deleteTask(${t.id})">ডিলিট</button></div>`;
+        });
+        document.getElementById('tasksList').innerHTML = html || '<p>কোন টাস্ক নেই</p>';
+    }
+
+    async function loadTournamentsList() {
+        const tours = await apiCall('/api/tournaments', 'GET');
+        let html = '';
+        tours.forEach(t => {
+            html += `<div class="d-flex justify-content-between border-bottom p-2"><div><b>${t.name}</b><br><small>Entry:${t.entry_fee} Prize:${t.prize_pool}</small></div><button class="btn btn-sm btn-danger" onclick="deleteTournament(${t.id})">ডিলিট</button></div>`;
+        });
+        document.getElementById('tournamentsList').innerHTML = html || '<p>কোন টুর্নামেন্ট নেই</p>';
+    }
+
+    async function loadTournamentSelect() {
+        const tours = await apiCall('/api/tournaments', 'GET');
+        let opts = '<option value="">বাছাই করুন</option>';
+        tours.forEach(t => { opts += `<option value="${t.id}">${t.name}</option>`; });
+        document.getElementById('manageTournamentSelect').innerHTML = opts;
+    }
+
+    window.loadTournamentForManagement = async function() {
+        const tid = document.getElementById('manageTournamentSelect').value;
+        if (!tid) { document.getElementById('tournamentManageContent').classList.add('hidden'); return; }
+        const tours = await apiCall('/api/tournaments', 'GET');
+        const tournament = tours.find(t => t.id == tid);
+        if (!tournament) return;
+        currentManageTournament = tournament;
+        document.getElementById('manageTournamentName').innerText = tournament.name;
+        document.getElementById('joinedCount').innerText = tournament.current_participants || 0;
+        const participants = await apiCall(`/api/tournament_participants/${tid}`, 'GET');
+        const selectedCount = participants.filter(p => p.status === 'selected' || p.status === 'room_received').length;
+        document.getElementById('selectedCount').innerText = selectedCount;
+        document.getElementById('maxCount').innerText = tournament.max_players;
+        document.getElementById('tournamentStatusSelect').value = tournament.status || 'upcoming';
+        await loadParticipantsList(tid);
+        await loadSelectionHistory(tid);
+        const roomDiv = document.getElementById('currentRoomDetails');
+        if (tournament.room_details) {
+            roomDiv.innerHTML = `<small>রুম: ${tournament.room_details.roomId}</small><br><small>পাস: ${tournament.room_details.password}</small>`;
+            roomDiv.classList.remove('hidden');
+        } else roomDiv.classList.add('hidden');
+        document.getElementById('tournamentManageContent').classList.remove('hidden');
+    };
+
+    async function loadParticipantsList(tid) {
+        const participants = await apiCall(`/api/tournament_participants/${tid}`, 'GET');
+        let html = '';
+        participants.forEach(p => {
+            html += `<div class="participant-item ${p.status === 'selected' || p.status === 'room_received' ? 'selected' : ''}"><strong>${p.ffid || 'N/A'}</strong><br>${p.email}<br>📱 ${p.phone || 'N/A'}<br><span class="badge bg-secondary">${p.status}</span>${p.selection_round ? ` রাউন্ড ${p.selection_round}` : ''}<br><button class="btn btn-sm btn-outline-danger mt-1" onclick="removeSingleParticipant(${p.id})">অপসারণ</button></div>`;
+        });
+        document.getElementById('participantsList').innerHTML = html || '<p>কোন প্লেয়ার নেই</p>';
+    }
+
+    async function loadSelectionHistory(tid) {
+        try {
+            const selections = await apiCall(`/api/tournament_selections/${tid}`, 'GET');
+            let html = '<h6>সিলেকশন হিস্ট্রি:</h6>';
+            if (selections.length === 0) {
+                html += '<p class="text-muted">কোন সিলেকশন হয়নি</p>';
+            } else {
+                selections.forEach(s => {
+                    html += `<div class="alert alert-info p-2 mb-1 small">রাউন্ড ${s.round}: ${s.selected_count} জন (${new Date(s.selected_at).toLocaleString()})</div>`;
+                });
+            }
+            document.getElementById('selectionHistory').innerHTML = html;
+        } catch(e) { console.error(e); }
+    }
+
+    window.selectRandomPlayers = async function() {
+        if (!currentManageTournament) return;
+        const count = parseInt(document.getElementById('selectCount').value);
+        if (!count || count < 1) { alert('সংখ্যা দিন'); return; }
+        try {
+            await apiCall('/api/select_random', 'POST', { admin_email: ADMIN_EMAIL, tournament_id: currentManageTournament.id, count });
+            showSuccess('সিলেক্ট সম্পন্ন');
+            await loadTournamentForManagement();
+            await loadTournaments();
+        } catch(e) { alert(e.message); }
+    };
+
+    window.setRoomDetails = async function() {
+        if (!currentManageTournament) return;
+        const roomId = document.getElementById('roomId').value;
+        const password = document.getElementById('roomPassword').value;
+        if (!roomId || !password) { alert('রুম আইডি ও পাস দিন'); return; }
+        try {
+            await apiCall('/api/set_room', 'POST', { admin_email: ADMIN_EMAIL, tournament_id: currentManageTournament.id, room_id: roomId, password });
+            showSuccess('রুম সেট');
+            await loadTournamentForManagement();
+            await loadTournaments();
+        } catch(e) { alert(e.message); }
+    };
+
+    window.updateTournamentStatus = async function() {
+        if (!currentManageTournament) return;
+        const status = document.getElementById('tournamentStatusSelect').value;
+        try {
+            await apiCall('/api/update_tournament_status', 'POST', { admin_email: ADMIN_EMAIL, tournament_id: currentManageTournament.id, status });
+            showSuccess('স্ট্যাটাস আপডেট');
+            await loadTournamentForManagement();
+            await loadTournaments();
+        } catch(e) { alert(e.message); }
+    };
+
+    window.removeSingleParticipant = async function(participantId) {
+        if (confirm('প্লেয়ার অপসারণ?')) {
+            try {
+                await apiCall('/api/remove_participant', 'DELETE', { admin_email: ADMIN_EMAIL, participant_id: participantId });
+                showSuccess('অপসারণ');
+                await loadTournamentForManagement();
+            } catch(e) { alert(e.message); }
+        }
+    };
+
+    window.searchParticipant = async function() {
+        if (!currentManageTournament) return;
+        const term = document.getElementById('participantSearch').value.toLowerCase();
+        const participants = await apiCall(`/api/tournament_participants/${currentManageTournament.id}`, 'GET');
+        const found = participants.filter(p => (p.ffid && p.ffid.toLowerCase().includes(term)) || (p.email && p.email.toLowerCase().includes(term)) || (p.phone && p.phone.includes(term)));
+        const container = document.getElementById('participantSearchResult');
+        if (found.length === 0) { container.innerHTML = '<p class="text-muted">পাওয়া যায়নি</p>'; return; }
+        let html = '<h6>রেজাল্ট:</h6>';
+        found.forEach(p => {
+            html += `<div class="participant-item"><strong>${p.ffid || 'N/A'}</strong><br>${p.email}<br>📱 ${p.phone || 'N/A'}<br><span class="badge bg-secondary">${p.status}</span></div>`;
+        });
+        container.innerHTML = html;
+    };
+
+    window.addTask = async function() {
+        const title = document.getElementById('taskTitle').value;
+        const desc = document.getElementById('taskDesc').value;
+        const reward = parseInt(document.getElementById('taskReward').value);
+        const type = document.getElementById('taskType').value;
+        const link = document.getElementById('taskLink').value;
+        const code = document.getElementById('taskCode').value;
+        const image = document.getElementById('taskImage').value;
+        if (!title || !desc || !reward) { alert('পূরণ করুন'); return; }
+        try {
+            await apiCall('/api/tasks', 'POST', { admin_email: ADMIN_EMAIL, title, description: desc, reward, type, link, code, image_url: image });
+            showSuccess('টাস্ক যোগ');
+            await loadTasksList();
+            await loadTasks();
+        } catch(e) { alert(e.message); }
+    };
+
+    window.deleteTask = async function(id) {
+        if (confirm('ডিলিট?')) {
+            try {
+                await apiCall(`/api/tasks/${id}`, 'DELETE', { admin_email: ADMIN_EMAIL });
+                showSuccess('ডিলিট');
+                await loadTasksList();
+                await loadTasks();
+            } catch(e) { alert(e.message); }
+        }
+    };
+
+    window.addTournament = async function() {
+        const name = document.getElementById('tournamentName').value;
+        const type = document.getElementById('tournamentType').value;
+        const map = document.getElementById('tournamentMap').value;
+        const fee = parseInt(document.getElementById('entryFee').value);
+        const max = parseInt(document.getElementById('maxPlayers').value);
+        const prize = document.getElementById('prizePool').value;
+        const start = document.getElementById('startTime').value;
+        const image = document.getElementById('tournamentImage').value;
+        if (!name || !fee || !max || !prize || !start) { alert('সব পূরণ করুন'); return; }
+        try {
+            await apiCall('/api/tournaments', 'POST', { admin_email: ADMIN_EMAIL, name, type, map, entry_fee: fee, max_players: max, prize_pool: prize, start_time: start, image_url: image });
+            showSuccess('টুর্নামেন্ট তৈরি');
+            await loadTournamentsList();
+            await loadTournamentSelect();
+            await loadTournaments();
+        } catch(e) { alert(e.message); }
+    };
+
+    window.deleteTournament = async function(id) {
+        if (confirm('ডিলিট?')) {
+            try {
+                await apiCall(`/api/tournaments/${id}`, 'DELETE', { admin_email: ADMIN_EMAIL });
+                showSuccess('ডিলিট');
+                await loadTournamentsList();
+                await loadTournamentSelect();
+                await loadTournaments();
+            } catch(e) { alert(e.message); }
+        }
+    };
+
+    window.addPopup = async function() {
+        const image = document.getElementById('popupImage').value;
+        const link = document.getElementById('popupLink').value;
+        const text = document.getElementById('popupText').value;
+        if (!image) { alert('ইমেজ URL দিন'); return; }
+        try {
+            await apiCall('/api/popups', 'POST', { admin_email: ADMIN_EMAIL, image_url: image, link, text });
+            showSuccess('পপআপ যোগ');
+            await loadPopupsList();
+        } catch(e) { alert(e.message); }
+    };
+
+    async function loadPopupsList() {
+        const popups = await apiCall('/api/popups', 'GET');
+        let html = '<div class="row">';
+        popups.forEach(p => {
+            html += `<div class="col-md-4 mb-3"><img src="${p.image_url}" style="height:100px;object-fit:cover" class="img-fluid rounded"><br><small>${p.text || ''}</small><button class="btn btn-sm btn-danger w-100 mt-1" onclick="deletePopup(${p.id})">ডিলিট</button></div>`;
+        });
+        html += '</div>';
+        document.getElementById('popupsList').innerHTML = html || '<p>কোন পপআপ নেই</p>';
+    }
+
+    window.deletePopup = async function(id) {
+        if (confirm('ডিলিট?')) {
+            try {
+                await apiCall(`/api/popups/${id}`, 'DELETE', { admin_email: ADMIN_EMAIL });
+                showSuccess('ডিলিট');
+                await loadPopupsList();
+            } catch(e) { alert(e.message); }
+        }
+    };
+
+    window.updateAbout = async function() {
+        const content = document.getElementById('aboutContent').value;
+        const image = document.getElementById('aboutImage').value;
+        try {
+            await apiCall('/api/about', 'POST', { admin_email: ADMIN_EMAIL, content, image_url: image });
+            showSuccess('আপডেট');
+            await loadAbout();
+        } catch(e) { alert(e.message); }
+    };
+
+    async function loadAboutForEdit() {
+        const about = await apiCall('/api/about', 'GET');
+        document.getElementById('aboutContent').value = about.content || '';
+        document.getElementById('aboutImage').value = about.image_url || '';
+    }
+
+    window.giveCoins = async function(uid) {
+        const amt = prompt('কয়েন যোগ করুন:');
+        if (amt) {
+            try {
+                await apiCall('/api/give_coins', 'POST', { admin_email: ADMIN_EMAIL, user_id: uid, amount: parseInt(amt) });
+                showSuccess(`${amt} কয়েন যোগ`);
+                await loadUsersList();
+                if (currentUser && currentUser.id === uid) {
+                    currentUser.coins += parseInt(amt);
+                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                    document.getElementById('account').innerHTML = renderAccount();
+                }
+            } catch(e) { alert(e.message); }
+        }
+    };
+
+    window.deleteUser = async function(uid) {
+        if (confirm('ইউজার ডিলিট?')) {
+            try {
+                await apiCall('/api/delete_user', 'DELETE', { admin_email: ADMIN_EMAIL, user_id: uid });
+                showSuccess('ডিলিট');
+                await loadUsersList();
+                if (currentUser && currentUser.id === uid) {
+                    currentUser = null;
+                    localStorage.removeItem('currentUser');
+                    isAdmin = false;
+                    updateAdminUI();
+                    showPage('home');
+                    document.getElementById('account').innerHTML = renderAccount();
+                }
+            } catch(e) { alert(e.message); }
+        }
+    };
+
+    window.searchUser = async function() {
+        const term = document.getElementById('userSearch').value.toLowerCase();
+        const users = await apiCall('/api/users?admin_email=' + ADMIN_EMAIL, 'GET');
+        const results = users.filter(u => u.email.toLowerCase().includes(term) || (u.ffid && u.ffid.toLowerCase().includes(term)) || (u.phone && u.phone.includes(term)));
+        const div = document.getElementById('searchResult');
+        if (results.length === 0) { div.innerHTML = '<p class="text-muted">কোন ইউজার নেই</p>'; div.classList.remove('hidden'); return; }
+        let html = '';
+        results.forEach(u => {
+            html += `<div class="border-bottom pb-2 mb-2"><strong>${u.email}</strong><br>FFID: ${u.ffid || 'N/A'}<br>Phone: ${u.phone || 'N/A'}<br>Coins: ${u.coins || 0}<br><button class="btn btn-sm btn-success" onclick="giveCoins(${u.id})">কয়েন যোগ</button> <button class="btn btn-sm btn-danger" onclick="deleteUser(${u.id})">ডিলিট</button></div>`;
+        });
+        div.innerHTML = html;
+        div.classList.remove('hidden');
+    };
+
+    window.bulkAddCoins = async function() {
+        const emails = document.getElementById('bulkCoinEmail').value.split(',').map(e => e.trim());
+        const amount = parseInt(document.getElementById('bulkCoinAmount').value);
+        if (!amount || emails.length === 0) { alert('ইমেইল ও কয়েন সংখ্যা দিন'); return; }
+        try {
+            await apiCall('/api/bulk_add_coins', 'POST', { admin_email: ADMIN_EMAIL, emails, amount });
+            showSuccess('বাল্ক আপডেট সম্পন্ন');
+            await loadUsersList();
+        } catch(e) { alert(e.message); }
+    };
+
+    window.removeUserFromAllTournaments = async function() {
+        const email = document.getElementById('globalRemoveUserId').value.trim();
+        if (!email) return;
+        const users = await apiCall('/api/users?admin_email=' + ADMIN_EMAIL, 'GET');
+        const user = users.find(u => u.email === email);
+        if (!user) { alert('ইউজার নেই'); return; }
+        try {
+            await apiCall('/api/remove_user_from_all_tournaments', 'POST', { admin_email: ADMIN_EMAIL, user_id: user.id });
+            showSuccess('সমস্ত টুর্নামেন্ট থেকে অপসারণ');
+            await loadTournamentForManagement();
+        } catch(e) { alert(e.message); }
+    };
+
+    window.setGlobalNotice = async function() {
+        const text = document.getElementById('globalNotice').value;
+        try {
+            await apiCall('/api/config/global_notice', 'POST', { admin_email: ADMIN_EMAIL, text });
+            showSuccess('নোটিশ আপডেট');
+            await loadGlobalNoticeForEdit();
+        } catch(e) { alert(e.message); }
+    };
+
+    async function loadGlobalNoticeForEdit() {
+        const notice = await apiCall('/api/config/global_notice', 'GET');
+        document.getElementById('globalNotice').value = notice.text;
+    }
+
+    async function loadSupportForEdit() {
+        const support = await apiCall('/api/config/support', 'GET');
+        document.getElementById('adminWhatsApp').value = support.whatsapp;
+        document.getElementById('adminTelegram').value = support.telegram;
+    }
+
+    window.saveSupportContacts = async function() {
+        const whatsapp = document.getElementById('adminWhatsApp').value;
+        const telegram = document.getElementById('adminTelegram').value;
+        try {
+            await apiCall('/api/config/support', 'POST', { admin_email: ADMIN_EMAIL, whatsapp, telegram });
+            showSuccess('সাপোর্ট কন্টাক্ট সেভ হয়েছে');
+            const support = await apiCall('/api/config/support', 'GET');
+            document.getElementById('supportBtn').href = `https://wa.me/${support.whatsapp}`;
+        } catch(e) { alert(e.message); }
+    };
+
+    // Backup/Restore
+    window.manualBackup = async function() {
+        try {
+            const backup = await apiCall(`/api/backup?admin_email=${ADMIN_EMAIL}`, 'GET');
+            localStorage.setItem('tunff09_full_backup', JSON.stringify(backup));
+            showSuccess('ব্যাকআপ সংরক্ষিত');
+        } catch(e) { alert(e.message); }
+    };
+
+    window.downloadBackup = function() {
+        const data = localStorage.getItem('tunff09_full_backup');
+        if (!data) { alert('কোনো ব্যাকআপ নেই। আগে "ব্যাকআপ নিন" ক্লিক করুন।'); return; }
+        const blob = new Blob([data], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `tunff09_backup_${new Date().toISOString().slice(0,19)}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        showSuccess('JSON ফাইল ডাউনলোড শুরু হয়েছে');
+    };
+
+    window.restoreFromFile = async function() {
+        const fileInput = document.getElementById('restoreFileInput');
+        if (!fileInput.files.length) { alert('একটি JSON ফাইল নির্বাচন করুন'); return; }
+        const file = fileInput.files[0];
+        const reader = new FileReader();
+        reader.onload = async function(e) {
+            try {
+                const backup = JSON.parse(e.target.result);
+                await apiCall('/api/restore', 'POST', { admin_email: ADMIN_EMAIL, backup });
+                showSuccess('রিস্টোর সম্পন্ন! পৃষ্ঠা রিফ্রেশ হচ্ছে...');
+                setTimeout(() => location.reload(), 1500);
+            } catch(err) { alert('JSON পার্সিং error: '+err.message); }
+        };
+        reader.readAsText(file);
+    };
+
+    // Initialization
+    (async() => {
+        const main = document.getElementById('mainContent');
+        const pages = ['home','task','tournament','history','about','account'];
+        let inner = '';
+        pages.forEach(p => inner += `<div id="${p}" class="page"></div>`);
+        main.innerHTML = inner;
+        const saved = localStorage.getItem('currentUser');
+        if (saved) {
+            currentUser = JSON.parse(saved);
+            if (currentUser.email === ADMIN_EMAIL) isAdmin = true;
+        }
+        updateAdminUI();
+        document.getElementById('home').innerHTML = await renderHome();
+        document.getElementById('task').innerHTML = renderTask();
+        document.getElementById('tournament').innerHTML = renderTournament();
+        document.getElementById('history').innerHTML = renderHistory();
+        document.getElementById('about').innerHTML = renderAbout();
+        document.getElementById('account').innerHTML = renderAccount();
+        document.getElementById('home').classList.add('active');
+        await loadAbout();
+        await loadTasks();
+        await loadTournaments();
+        if (currentUser) await loadUserHistory();
+        // Show code input for task type
+        document.getElementById('taskType').addEventListener('change', (e) => {
+            const codeField = document.getElementById('taskCode');
+            if (e.target.value === 'youtube_code') codeField.style.display = 'block';
+            else codeField.style.display = 'none';
+        });
+    })();
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
